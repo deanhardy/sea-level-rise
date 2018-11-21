@@ -6,7 +6,7 @@ library(tidyverse) ## load tidyverse package
 datadir <- '/Users/dhardy/Dropbox/r_data/sea-level-rise'
 
 ## define SLR site(s) of interest
-loc <- 'GMSL'
+loc <- c('GMSL', 'grid_31.5_278.5')
 # loc <- 'grid_31.5_278.5' ## Sapelo Island, Georgia's closest grid point
 
 ## import data from Sweet et al 2017, grid pt 31.5, 278.5 just inland in McIntosh
