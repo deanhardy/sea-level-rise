@@ -44,7 +44,7 @@ OUT <-
   OUT2 <- OUT %>%
     mutate(station = as.character(STATION[[z]])) %>%
     mutate(yrmo = paste(year, month, sep = '-')) %>%
-    mutate(date = as.Date(paste(yrmo, '-01', sep = '')))
+    mutate(date = as.Date(paste(yrmo, '-15', sep = '')))
 
   df <- rbind(df, OUT2)
 }
@@ -94,7 +94,8 @@ for (i in D) {
 
 T <- 3653*i ## set time period
 T_name <- ifelse(T == 3653, "Decade", 
-                 ifelse(T == 3653*2, 'Two Decades', 'Three Decades'))
+                 ifelse(T == 3653*2, 'Two Decades', 
+                        ifelse(T == 3653*3, 'Three Decades', 'Four Decades')))
 ## filter all data to one station and selected time period
 dat2 <- filter(df, station == '8670870' & date >= Sys.Date()-T) %>%
   mutate(MSL = MSL*100) %>%
@@ -109,8 +110,9 @@ fig2 <- ggplot(dat2, aes(x = date, y = MSL)) +
   geom_smooth(method = 'lm', color = 'black', formula = my.formula) +
   ## next three lines add linear trend lines for each decade
   geom_smooth(data = filter(dat2, date >= last(date)-3653), method = 'lm', color = 'purple', formula = my.formula, se = FALSE) +
-  geom_smooth(data = filter(dat2, date >= last(date)-3653*2 & date <= last(date)-3653), method = 'lm', color = 'coral', formula = my.formula, se = FALSE) +
-  geom_smooth(data = filter(dat2, date <= first(date)+3653), method = 'lm', color = 'red', formula = my.formula, se = FALSE) +
+  geom_smooth(data = filter(dat2, date >= last(date)-3653*2 & date <= last(date)-3653), method = 'lm', color = 'red', formula = my.formula, se = FALSE) +
+  geom_smooth(data = filter(dat2, date >= last(date)-3653*3 & date <= last(date)-3653*2), method = 'lm', color = 'coral', formula = my.formula, se = FALSE) +
+  geom_smooth(data = filter(dat2, date <= first(date)+3653), method = 'lm', color = 'yellow', formula = my.formula, se = FALSE) +
   geom_smooth(method = 'loess', color = 'grey30', linetype = 2, se = FALSE) +
   # stat_poly_eq(formula = my.formula, 
   #              aes(label = paste(..eq.label.., sep = "~~~")), 
