@@ -19,14 +19,14 @@ datadir <- '/Users/dhardy/Dropbox/r_data/sea-level-rise'
 ## define variables
 STATION <- c(8670870, 8720030) ## define stations
 DATUM <- 'MSL' ## define datum
-T <- seq(0,7,1) ## define number of decades of data to grab where 0 = 1 decade, 1 = 2 decades, etc
+P <- seq(0,8,1) ## define number of decades of data to grab where 0 = 1 decade, 1 = 2 decades, etc
 df <- NULL ## empty dataframe
 
 ## for loop to grab data in decadal increments for multiple stations
 for (z in 1:length(STATION)) {
   
-for (i in 1:length(T)) {
-DATE <- Sys.Date()-(3653*T)
+for (i in 1:length(P)) {
+DATE <- Sys.Date()-(3653*P)
 
 OUT <-
   coops_search(
@@ -64,38 +64,31 @@ fig <- ggplot(df, aes(x = date, y = MSL, color = station)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
         legend.position = 'right') + 
   ggtitle(paste("Monthly Mean Sea Level")) 
-#   facet_wrap(~station)
 fig
 
 # save plots as .png
 ggsave(fig, file=paste(datadir,
                         '/figures/sea-level', ".png", sep=''), width = 6, height = 4, units = 'in', scale=2)
 
-
 ## working on adding equation with slope
 library(ggpmisc)
-# GET EQUATION AND R-SQUARED AS STRING
-# SOURCE: https://groups.google.com/forum/#!topic/ggplot2/1TgH-kG5XMA
-## from https://stackoverflow.com/questions/7549694/add-regression-line-equation-and-r2-on-graph
-# lm_eqn <- function(dat2){
-#   m <- lm(MSL ~ date, dat2);
-#   eq <- substitute(italic(y) == a + b %.% italic(x)*","~~italic(r)^2~"="~r2,
-#                    list(a = format(unname(coef(m)[1]), digits = 3),
-#                         b = format(unname(coef(m)[2]), digits = 2),
-#                         r2 = format(summary(m)$r.squared, digits = 3)))
-#   as.character(as.expression(eq));
-# }
 
 ## set parameters
 my.formula <- y ~ x # generic formula for use in equation
-D <- T+1
+D <- P+1
 
 for (i in D) {
 
 T <- 3653*i ## set time period
 T_name <- ifelse(T == 3653, "Decade", 
                  ifelse(T == 3653*2, 'Two Decades', 
-                        ifelse(T == 3653*3, 'Three Decades', 'Four Decades')))
+                        ifelse(T == 3653*3, 'Three Decades', 
+                               ifelse(T == 3653*4, 'Four Decades',
+                                      ifelse(T == 3653*5, 'Five Decades',
+                                             ifelse(T == 3653*6, 'Six Decades',
+                                                    ifelse(T == 3653*7, 'Seven Decades', 
+                                                           ifelse(T == 3653*8, 'Eight Decades', 'Nine Decades'))))))))
+
 ## filter all data to one station and selected time period
 dat2 <- filter(df, station == '8670870' & date >= Sys.Date()-T) %>%
   mutate(MSL = MSL*100) %>%
@@ -108,11 +101,6 @@ fig2 <- ggplot(dat2, aes(x = date, y = MSL)) +
   geom_hline(yintercept = 0, linetype = 1.5, lwd = 0.5) +
   geom_line(color = 'blue', lwd = 0.2) + 
   geom_smooth(method = 'lm', color = 'black', formula = my.formula) +
-  ## next three lines add linear trend lines for each decade
-  # geom_smooth(data = filter(dat2, date >= last(date)-3653), method = 'lm', color = 'purple', formula = my.formula, se = FALSE) +
-  # geom_smooth(data = filter(dat2, date >= last(date)-3653*2 & date <= last(date)-3653), method = 'lm', color = 'red', formula = my.formula, se = FALSE) +
-  # geom_smooth(data = filter(dat2, date >= last(date)-3653*3 & date <= last(date)-3653*2), method = 'lm', color = 'coral', formula = my.formula, se = FALSE) +
-  # geom_smooth(data = filter(dat2, date <= first(date)+3653), method = 'lm', color = 'yellow', formula = my.formula, se = FALSE) +
   geom_smooth(method = 'loess', color = 'grey30', linetype = 2, se = FALSE) +
   scale_y_continuous(name = paste(DATUM, '(cm)'),
                      breaks = seq(-40, 40, by = 10),
@@ -125,8 +113,8 @@ fig2 <- ggplot(dat2, aes(x = date, y = MSL)) +
                date_labels = '%Y',
                expand = c(0,0)) + 
               # limits = c(first(date), last(date))) + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 12),
-        axis.text.y = element_text(size = 12),
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10),
+        axis.text.y = element_text(size = 10),
         legend.position = 'bottom',
         panel.background = element_rect(fill = "white", color = 'black', linetype = 1),
         #panel.border = element_rect(fill = 'white', color = 'black'),
@@ -142,7 +130,6 @@ fig2 <- ggplot(dat2, aes(x = date, y = MSL)) +
            x = Sys.Date()-(T), y = Inf, hjust =-0.08, vjust = 7) + 
   labs(caption = paste("Data: Monthly ", DATUM, " for NOAA Station ID: ", dat2$station, 
                        ', ', first(dat2$date), ' to ', last(dat2$date), sep = ''))
-#   facet_wrap(~station)
 fig2
 
 # save plots as .png
