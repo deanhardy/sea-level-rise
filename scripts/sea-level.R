@@ -51,6 +51,7 @@ OUT <-
 }
 }
 
+
 ## plot mean monthly sea levels for all stations and draw regression line for each station
 fig <- ggplot(df, aes(x = date, y = MSL, color = station)) +
   geom_line(lwd = 0.5) + 
@@ -77,6 +78,8 @@ library(ggpmisc)
 my.formula <- y ~ x # generic formula for use in equation
 D <- P+1
 
+for (z in STATION) {
+
 for (i in D) {
 
 T <- 3653*i ## set time period
@@ -90,7 +93,7 @@ T_name <- ifelse(T == 3653, "Decade",
                                                            ifelse(T == 3653*8, 'Eight Decades', 'Nine Decades'))))))))
 
 ## filter all data to one station and selected time period
-dat2 <- filter(df, station == '8670870' & date >= Sys.Date()-T) %>%
+dat2 <- filter(df, station == z & date >= Sys.Date()-T) %>%
   mutate(MSL = MSL*100) %>%
   arrange(date)
 m <- lm(MSL ~ date, dat2) ## create regression line
@@ -108,8 +111,8 @@ fig2 <- ggplot(dat2, aes(x = date, y = MSL)) +
                      limits = c(-40, 40),
                      expand = c(0,0)) + 
   scale_x_date(name = 'Year', 
-               date_breaks = '12 months', 
-               date_minor_breaks = '6 month',
+               date_breaks = '2 years', 
+               date_minor_breaks = '1 year',
                date_labels = '%Y',
                expand = c(0,0)) + 
               # limits = c(first(date), last(date))) + 
@@ -136,3 +139,5 @@ fig2
 ggsave(fig2, file=paste(datadir,
                        '/figures/sea-level-trends_', i, "-decade_station-", dat2$station[1], ".png", sep=''), width = 6, height = 4, units = 'in', scale=2)
 }
+}
+
