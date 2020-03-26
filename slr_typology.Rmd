@@ -1,0 +1,79 @@
+---
+title: ""
+output: 
+  pdf_document:
+    fig_caption: false
+    keep_tex: yes
+classoption: landscape
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(magick)
+library(webshot)
+library(knitr)
+library(kableExtra)
+library(tidyverse)
+library(readxl)
+```
+
+# SLR Typology Lit Review Results
+```{r, include=TRUE, echo=FALSE}
+# 
+# # define data directory
+# datadir <- file.path('/Users/dhardy/Dropbox/r_data/sea-level-rise')
+# 
+# # create data table
+# dat <- read_excel(file.path(datadir, 'data/slr-typology-litreview.xlsx'), sheet = 'Analysis') %>%
+#   slice(1:n()-1)
+# 
+# df <- dat %>%
+#   summarise_at(vars(MHHW:Other), sum, na.rm = TRUE)
+#   
+# # LaTeX Table
+# kable(df, format = "latex", booktabs = T, caption = NULL) %>%
+#   kable_styling(latex_options = "scale_down",
+#                 full_width = NULL) %>%
+#   # add_header_above(c(" ", "Private" = 2, "Public" = 2)) %>%
+#   # add_footnote(c("table footnote")) %>%
+#   as_image(width = 9)
+```
+
+```{r, include=TRUE, echo=FALSE}
+
+# rm(list=ls())
+
+# define data directory
+datadir <- file.path('/Users/dhardy/Dropbox/r_data/sea-level-rise')
+
+# create data table
+dat <- read_excel(file.path(datadir, 'data/slr-typology-litreview.xlsx'), sheet = 'Analysis') %>%
+  slice(1:n()-1)
+
+df <- dat %>%
+  mutate(Source = str_c(AUTHORS_ETAL, ' (', YEAR, ')', sep = '')) %>%
+  select(Source, `Average Cites/Year`, MHHW:'Other Extent') %>%
+  select(-Other) %>%
+  replace(is.na(.), "")
+
+df2 <- dat %>%
+  summarise_at(vars(MHHW:Other), sum, na.rm = TRUE) %>%
+  mutate(Source = 'Total', `Average Cites/Year` = NA) %>%
+  select(Source, 'Average Cites/Year', MHHW:Other) %>%
+  rename('Other Extent' = Other)
+
+df3 <- rbind(df, df2)
+#  select(Source, 'Average Cites/Year', '100-Yr Flood', MHHW, LECZ, '1-Yr Flood', 'Meter Increments', )
+
+coln <- df %>%
+  colnames()
+#  c('Source', 'Average Cites/Year')
+
+# LaTeX Table
+kable(df3, format = "latex", booktabs = T, caption = NULL,
+      col.names = coln, align = 'lrcccccccccl') %>%
+  kable_styling(latex_options = c("stripe", "scale_down"),
+                full_width = NULL) %>%
+  # add_header_above(c(" ", "Private" = 2, "Public" = 2)) %>%
+  # add_footnote(c("table footnote")) %>%
+  as_image(width = 9)
+```
