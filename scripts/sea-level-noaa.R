@@ -17,7 +17,7 @@ datadir <- '/Users/dhardy/Dropbox/r_data/sea-level-rise'
 #                  stringsAsFactors = FALSE)
 
 ## define variables
-STATION <- c(8661070) ## define stations 8720030, 8670870, 
+STATION <- c(8670870) ## define stations 8720030, 8661070, 
 DATUM <- 'MSL' ## define datum
 P <- seq(0,8,1) ## define number of decades of data to grab where 0 = 1 decade, 1 = 2 decades, etc
 df <- NULL ## empty dataframe
