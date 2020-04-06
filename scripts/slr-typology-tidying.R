@@ -6,7 +6,7 @@ library(readxl)
 datadir <- '/Users/dhardy/Dropbox/r_data/sea-level-rise'
 
 dat_old <- read_xls(file.path(datadir, 'data/OLD-web-of-science-searches/savedrecs-slr+pop+risk+vuln+exp.xls'), sheet = 'filtered')
-dat_new <- read_xls(file.path(datadir, 'data/web-of-science-searches/SCI-E+SSCI_slr+pop+risk+vuln+exp.xls'), sheet = 'filtered')
+dat_new <- read_xls(file.path(datadir, 'data/web-of-science-searches/SCI-E+SSCI_slr+pop+risk+vuln+exp_w_quotes.xls'), sheet = 'filtered')
 dat_new_full <- read_xls(file.path(datadir, 'data/web-of-science-searches/SCI-E+SSCI_slr+pop+risk+vuln+exp.xls'), sheet = 'savedrecs', skip = 27)
 
 
@@ -15,7 +15,7 @@ dat_addition <- anti_join(by = 'Title', dat_new, dat_old)
 
 dat_remove <- anti_join(by = 'Title', dat_old, dat_new)
 
-## Was 101, now 155, so 54 new articles to comb through
+## Was 101, now 152, but 3 removed, so 54 new articles to comb through
 
 ## seems there are 3 articles in the old dataset that are not in the new dataset. see dat_remove
 ## Only 2 of the 3 were previously "relevant" meaning made the cut. One (Hallegatte et al 2011) has fewer citations (somehow), so now falls below the cut of >=4 cites/year
@@ -25,7 +25,7 @@ dat_remove <- anti_join(by = 'Title', dat_old, dat_new)
 dat4upload <- dat_addition %>%
   mutate(Assignment = NA,
     'DOI BASE' = 'http://dx.doi.org/', 'DOI LINK' = paste('http://dx.doi.org/', DOI, sep = ''),
-    AUTHORS_ETAL = paste(Authors, " et al."), PaperID = seq(102, 155, 1)) %>%
+    AUTHORS_ETAL = paste(Authors, " et al."), PaperID = seq(102, 116, 1)) %>%
   select('Publication Year',	'PaperID',	'DOI BASE',	'DOI', 'Assignment',	'DOI LINK',	'Title','Authors',	'AUTHORS_ETAL',	'Total Citations',	'Average per Year')
 
 write.csv(dat4upload, file.path(datadir, 'data/web-of-science-searches/SCI-E+SSCI_slr+pop+risk+vuln+exp.csv'))
