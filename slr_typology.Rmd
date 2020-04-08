@@ -14,6 +14,11 @@ library(knitr)
 library(kableExtra)
 library(tidyverse)
 library(readxl)
+
+rm(list=ls())
+
+# define data directory
+datadir <- file.path('/Users/dhardy/Dropbox/r_data/sea-level-rise')
 ```
 
 # SLR Typology Lit Review Results
@@ -40,27 +45,27 @@ library(readxl)
 
 ```{r, include=TRUE, echo=FALSE}
 
-# rm(list=ls())
-
-# define data directory
-datadir <- file.path('/Users/dhardy/Dropbox/r_data/sea-level-rise')
 
 # create data table
-dat <- read_excel(file.path(datadir, 'data/slr-typology-litreview.xlsx'), sheet = 'Analysis') %>%
-  slice(1:n()-1)
+dat <- read_excel(file.path(datadir, 'data/slr-typology-litreview.xlsx'), sheet = 'Revised_Analysis') 
 
+## tidy dataframe for making table
 df <- dat %>%
   mutate(Source = str_c(AUTHORS_ETAL, ' (', YEAR, ')', sep = '')) %>%
   select(Source, `Average Cites/Year`, MHHW:'Other Extent') %>%
   select(-Other) %>%
-  replace(is.na(.), "")
+  mutate_all(as.character)
 
+df[is.na(df)] <- ''
+
+## calculate totals for spatial extent methods
 df2 <- dat %>%
   summarise_at(vars(MHHW:Other), sum, na.rm = TRUE) %>%
-  mutate(Source = 'Total', `Average Cites/Year` = NA) %>%
+  mutate(Source = 'TOTAL', `Average Cites/Year` = NA) %>%
   select(Source, 'Average Cites/Year', MHHW:Other) %>%
   rename('Other Extent' = Other)
 
+## add totals row to dataframe
 df3 <- rbind(df, df2)
 #  select(Source, 'Average Cites/Year', '100-Yr Flood', MHHW, LECZ, '1-Yr Flood', 'Meter Increments', )
 
