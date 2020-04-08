@@ -21,64 +21,74 @@ rm(list=ls())
 datadir <- file.path('/Users/dhardy/Dropbox/r_data/sea-level-rise')
 ```
 
-# SLR Typology Lit Review Results
-```{r, include=TRUE, echo=FALSE}
-# 
-# # define data directory
-# datadir <- file.path('/Users/dhardy/Dropbox/r_data/sea-level-rise')
-# 
-# # create data table
-# dat <- read_excel(file.path(datadir, 'data/slr-typology-litreview.xlsx'), sheet = 'Analysis') %>%
-#   slice(1:n()-1)
-# 
-# df <- dat %>%
-#   summarise_at(vars(MHHW:Other), sum, na.rm = TRUE)
-#   
-# # LaTeX Table
-# kable(df, format = "latex", booktabs = T, caption = NULL) %>%
-#   kable_styling(latex_options = "scale_down",
-#                 full_width = NULL) %>%
-#   # add_header_above(c(" ", "Private" = 2, "Public" = 2)) %>%
-#   # add_footnote(c("table footnote")) %>%
-#   as_image(width = 9)
-```
-
+### SLR Typology Lit Review Results
 ```{r, include=TRUE, echo=FALSE}
 
 
 # create data table
 dat <- read_excel(file.path(datadir, 'data/slr-typology-litreview.xlsx'), sheet = 'Revised_Analysis') 
+# dat <- read_csv(file.path(datadir, 'data/slr-typology-litreview.csv')) 
+
+other_extent <- dat$other_extent
 
 ## tidy dataframe for making table
 df <- dat %>%
   mutate(Source = str_c(AUTHORS_ETAL, ' (', YEAR, ')', sep = '')) %>%
-  select(Source, `Average Cites/Year`, MHHW:'Other Extent') %>%
-  select(-Other) %>%
-  mutate_all(as.character)
+  select(Source, `Average Cites/Year`, mhhw:other) %>%
+  replace(is.na(.), 0) %>%
+  mutate(mhhw = if_else(meter_increments == 1, 1, mhhw),
+         p100yr = if_else(storm_surge == 1, 1, p100yr)) %>%
+  select(-meter_increments, -storm_surge) %>%
+  select(Source, 'Average Cites/Year', mhhw:other)
 
-df[is.na(df)] <- ''
+## tidy dataframe for making table
+# df <- dat %>%
+#   mutate(Source = str_c(AUTHORS_ETAL, ' (', YEAR, ')', sep = '')) %>%
+#   select(Source, `Average Cites/Year`, mhhw:other) %>%
+#   mutate_at(as.character()) %>%
+#   replace(is.na(.), "") %>%
+#   # mutate(mhhw = mhhw + meter_increments,
+#   #        p100yr = storm_surge + p100yr)
+#   mutate(mhhw = if_else(meter_increments == 1, 1, mhhw),
+#          p100yr = if_else(storm_surge == 1, 1, p100yr)) %>%
+#   select(-meter_increments, -storm_surge) %>%
+#   select(Source, 'Average Cites/Year', mhhw:other)
+
+df2 <- cbind(df, other_extent) %>%
+  select(-other) %>%
+  rename(other = other_extent) %>%
+  mutate(other = as.character(other)) %>%
+  mutate(other = if_else(is.na(other), "", other)) %>%
+  mutate_if(is.numeric, as.character) #%>%
+  # mutate(mhhw = if_else(mhhw == '0', "", '1'))
+
+df2[df2 == '0'] <- ""
 
 ## calculate totals for spatial extent methods
-df2 <- dat %>%
-  summarise_at(vars(MHHW:Other), sum, na.rm = TRUE) %>%
+df.sum <- df %>%
+  summarise_at(vars(mhhw:other), sum, na.rm = TRUE) %>%
   mutate(Source = 'TOTAL', `Average Cites/Year` = NA) %>%
-  select(Source, 'Average Cites/Year', MHHW:Other) %>%
-  rename('Other Extent' = Other)
+  select(Source, 'Average Cites/Year', mhhw:other)
+
+##
+# df <- df  %>%
+#   rename(other = other_extent)
+# dat[is.na(dat)] <- ''
+
 
 ## add totals row to dataframe
-df3 <- rbind(df, df2)
-#  select(Source, 'Average Cites/Year', '100-Yr Flood', MHHW, LECZ, '1-Yr Flood', 'Meter Increments', )
+df3 <- rbind(df2, df.sum) 
 
-coln <- df %>%
-  colnames()
-#  c('Source', 'Average Cites/Year')
+# df3[df3=='NA'] <- " "
+
+coln <- c('Source', 'Average Cites/Year', 'High Tide', '<1-Yr Flood','1-Yr Flood', '10-Yr Flood', '100-Yr Flood', '1000-Yr Flood', 'LECZ', 'Other Extent')
 
 # LaTeX Table
 kable(df3, format = "latex", booktabs = T, caption = NULL,
-      col.names = coln, align = 'lrcccccccccl') %>%
+      col.names = coln, align = 'lrccccccl') %>%
   kable_styling(latex_options = c("stripe", "scale_down"),
                 full_width = NULL) %>%
-  # add_header_above(c(" ", "Private" = 2, "Public" = 2)) %>%
-  # add_footnote(c("table footnote")) %>%
-  as_image(width = 9)
+  add_header_above(c(" " = 2, "Inundated" = 1, "Directly Affected" = 2, "Indirectly Affected" = 4)) %>%
+  add_footnote(c("Meter increment studies assumed to be High Tide studies; Studies not previously having a 100-yr or 1000-yr designator, but having storm surge included were assumed to be 100-yr floods. Need to double check these studies to ensure assumptions are correct before publishing.")) %>%
+  as_image(width = 8)
 ```
