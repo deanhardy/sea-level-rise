@@ -17,7 +17,7 @@ datadir <- '/Users/dhardy/Dropbox/r_data/sea-level-rise'
 #                  stringsAsFactors = FALSE)
 
 ## define variables
-STATION <- c(8670870) ## define stations 8720030, 8661070, 
+STATION <- c(8720030) ## define stations 8720030 (Fernandina), 8670870 (Fort Pulaski), 8661070 (Springmaid Pier, SC)
 DATUM <- 'MSL' ## define datum
 P <- seq(0,8,1) ## define number of decades of data to grab where 0 = 1 decade, 1 = 2 decades, etc
 df <- NULL ## empty dataframe
@@ -150,6 +150,6 @@ fig2
 
 # save plots as .png
 ggsave(fig2, file=paste(datadir,
-                       '/figures/', dat2$station[1], '-sea-level-trends_', i, "-decades", ".png", sep=''), width = 6, height = 4, units = 'in', scale=2)
+                       '/sea-level-trends/', dat2$station[1], '-sea-level-trends_', i, "-decades", ".png", sep=''), width = 6, height = 4, units = 'in', scale=2)
 }
 }
