@@ -18,9 +18,28 @@ datadir <- '/Users/dhardy/Dropbox/r_data/sea-level-rise'
 
 ## define variables
 STATION <- c(8670870) ## define stations 8720030, 8661070, 
-DATUM <- 'MSL' ## define datum
+DATUM <- 'MLLW' ## define datum
 P <- seq(0,8,1) ## define number of decades of data to grab where 0 = 1 decade, 1 = 2 decades, etc
 df <- NULL ## empty dataframe
+
+high_low <-
+  coops_search(
+    begin_date = as.character(as.Date("2000-03-09"), format = '%Y%m%d') %>% 
+      gsub('-', '', .) %>%
+      as.numeric(),
+    end_date = as.character(as.Date("2001-03-09"), format = '%Y%m%d') %>%
+      gsub('-', '', .) %>%
+      as.numeric(),
+    station_name = STATION,
+    product = 'high_low', 
+    datum = DATUM, 
+    units = 'metric', 
+    time_zone = 'GMT')$data
+
+hl <- high_low %>% filter(ty == 'HH')
+
+ggplot(aes(t, v), data = hl) +
+  geom_point()
 
 ## for loop to grab data in decadal increments for multiple stations
 for (z in 1:length(STATION)) {
