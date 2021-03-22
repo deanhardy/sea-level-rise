@@ -88,7 +88,7 @@ kable(df3, format = "latex", booktabs = T, caption = NULL,
       col.names = coln, align = 'lrccccccl') %>%
   kable_styling(latex_options = c("stripe", "scale_down"),
                 full_width = NULL) %>%
-  add_header_above(c(" " = 2, "Inundated" = 1, "Directly Affected" = 2, "Indirectly Affected" = 4)) %>%
+  add_header_above(c(" " = 2, "Inundated" = 1, "Frequently Flooding Effects" = 2, "Infrequent Flooding Effects" = 4)) %>%
   add_footnote(c("Meter increment studies assumed to be High Tide studies; Studies not previously having a 100-yr or 1000-yr designator, but having storm surge included were assumed to be 100-yr floods. Need to double check these studies to ensure assumptions are correct before publishing.")) %>%
   as_image(width = 8)
 ```
