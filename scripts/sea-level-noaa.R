@@ -70,6 +70,25 @@ OUT <-
 }
 }
 
+## plot annual mean sea levels for all stations and draw regression line for each station
+df.annual <- df %>%
+  group_by(year) %>%
+  summarise(MSL = mean(MSL*39.3701))
+  
+fig <- ggplot(df.annual, aes(x = year, y = MSL)) +
+  geom_line(lwd = 0.5) + 
+  # geom_smooth(method = 'lm') + 
+  scale_y_continuous(name = paste('Datum', DATUM, '(in)'),
+                     breaks = round(seq(-9, 8, by = 1), 2),
+                     minor_breaks = seq(-9, 8, by = 1)) + 
+  scale_color_gradient(low = 'yellow', high = 'red') + 
+  # scale_x_date(name = 'Date', 
+  #              date_breaks = '12 months', 
+  #              date_labels = '%y') + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
+        legend.position = 'right') + 
+  ggtitle(paste("Annual Mean Sea Level")) 
+fig
 
 ## plot mean monthly sea levels for all stations and draw regression line for each station
 fig <- ggplot(df, aes(x = date, y = MSL, color = station)) +
