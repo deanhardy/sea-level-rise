@@ -56,7 +56,7 @@ OUT <-
       gsub('-', '', .) %>%
       as.numeric(),
     station_name = STATION[[z]],
-    product = 'monthly_mean', 
+    product = 'high_low', 
     datum = DATUM, 
     units = 'metric', 
     time_zone = 'GMT')$data 
