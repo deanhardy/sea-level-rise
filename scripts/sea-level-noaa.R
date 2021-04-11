@@ -73,11 +73,16 @@ OUT <-
 ## plot annual mean sea levels for all stations and draw regression line for each station
 df.annual <- df %>%
   group_by(year) %>%
-  summarise(MSL = mean(MSL*39.3701))
-  
+  summarise(MSL = mean(MSL*39.3701)) 
+
+class <- df.annual %>%
+  mutate(class = )
+
+range <- (max(df.annual$MSL, na.rm = T) - min(df.annual$MSL, na.rm = T)) / 12
+
 fig <- ggplot(df.annual, aes(x = year, y = MSL)) +
   geom_line(lwd = 0.5) + 
-  # geom_smooth(method = 'lm') + 
+  geom_smooth(method = 'loess') + 
   scale_y_continuous(name = paste('Datum', DATUM, '(in)'),
                      breaks = round(seq(-9, 8, by = 1), 2),
                      minor_breaks = seq(-9, 8, by = 1)) + 
