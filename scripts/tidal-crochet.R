@@ -20,7 +20,7 @@ datadir <- '/Users/dhardy/Dropbox/r_data/sea-level-rise'
 ## define variables
 STATION <- c(8670870) ## define stations 8720030 (Fernandina), 8670870 (Fort Pulaski), 8661070 (Springmaid Pier, SC)
 DATUM <- 'MSL' ## define datum
-P <- seq(1979,2020,1) ## define number of decades of data to grab where 0 = 1 decade, 1 = 2 decades, etc
+P <- seq(1970,1970,1) ## define number of decades of data to grab where 0 = 1 decade, 1 = 2 decades, etc
 df <- NULL ## empty dataframe
 
 hh <-
