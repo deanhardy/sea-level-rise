@@ -8,6 +8,7 @@ rm(list=ls())
 library(rnoaa) ## package info https://cran.r-project.org/web/packages/rnoaa/rnoaa.pdf
 library(tidyverse)
 library(hydrostats)
+library(zoo)
 
 ## define data directory
 datadir <- '/Users/dhardy/Dropbox/r_data/sea-level-rise'
@@ -17,7 +18,7 @@ datadir <- '/Users/dhardy/Dropbox/r_data/sea-level-rise'
 #                  stringsAsFactors = FALSE)
 
 ## define variables
-STATION <- c(8670870) ## define stations 8720030 (Fernandina), 8670870 (Fort Pulaski), 8661070 (Springmaid Pier, SC)
+STATION <- c(8670870, 8720030, 8661070) ## define stations 8720030 (Fernandina), 8670870 (Fort Pulaski), 8661070 (Springmaid Pier, SC)
 DATUM <- 'MSL' ## define datum
 P <- seq(0,8,1) ## define number of decades of data to grab where 0 = 1 decade, 1 = 2 decades, etc
 df <- NULL ## empty dataframe
@@ -56,7 +57,7 @@ OUT <-
       gsub('-', '', .) %>%
       as.numeric(),
     station_name = STATION[[z]],
-    product = 'high_low', 
+    product = 'monthly_mean', 
     datum = DATUM, 
     units = 'metric', 
     time_zone = 'GMT')$data 
@@ -121,7 +122,7 @@ library(ggpmisc)
 my.formula <- y ~ x # generic formula for use in equation
 D <- P+1
 
-for (z in STATION) {
+for (z in 1:length(STATION)) {
 
 for (i in D) {
 
@@ -141,7 +142,7 @@ T_name <- ifelse(T == 3653, "Decade",
 #   arrange(date) %>%
 #   ifelse(first(date) > Sys.Date()-T, filter(dat2$date >= first(date)), filter(dat2$date >= Sys.Date()-T))
 
-dat2 <- filter(df, station == STATION[1]) %>%
+dat2 <- filter(df, station == STATION[[z]]) %>%
   mutate(MSL = MSL*100) %>%
   arrange(date) %>%
 filter(
@@ -188,11 +189,11 @@ fig2 <- ggplot(dat2, aes(x = date, y = MSL)) +
                                         round((coef(m)[2]*T*10/(T/365.3)), 2), 'mm/yr'),
            x = Sys.Date()-(T), y = Inf, hjust =-0.08, vjust = 7) +
   labs(caption = paste("Data: Monthly ", DATUM, " for NOAA Station ID: ", dat2$station, 
-                       ', ', first(dat2$date), ' to ', last(dat2$date), sep = ''))
+                       ', ', first(as.yearmon(dat2$date)), ' to ', last(as.yearmon(dat2$date)), sep = ''))
 fig2
 
 # save plots as .png
 ggsave(fig2, file=paste(datadir,
-                       '/sea-level-trends/', dat2$station[1], '-sea-level-trends_', i, "-decades", ".png", sep=''), width = 6, height = 4, units = 'in', scale=2)
+                       '/sea-level-trends/', dat2$station[[z]], '-sea-level-trends_', i, "-decades", ".png", sep=''), width = 6, height = 4, units = 'in', scale=2)
 }
 }
