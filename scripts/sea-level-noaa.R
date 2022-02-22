@@ -8,6 +8,7 @@ rm(list=ls())
 library(rnoaa) ## package info https://cran.r-project.org/web/packages/rnoaa/rnoaa.pdf
 library(tidyverse)
 library(hydrostats)
+library(zoo)
 
 ## define data directory
 datadir <- '/Users/dhardy/Dropbox/r_data/sea-level-rise'
@@ -17,7 +18,11 @@ datadir <- '/Users/dhardy/Dropbox/r_data/sea-level-rise'
 #                  stringsAsFactors = FALSE)
 
 ## define variables
+<<<<<<< HEAD
 STATION <- c(8661070) ## define stations 8720030 (Fernandina), 8670870 (Fort Pulaski), 8661070 (Springmaid Pier, SC)
+=======
+STATION <- c(8670870, 8720030, 8661070) ## define stations 8720030 (Fernandina), 8670870 (Fort Pulaski), 8661070 (Springmaid Pier, SC)
+>>>>>>> af4371b1f0ea5ac0a160e144f173ac262b510c20
 DATUM <- 'MSL' ## define datum
 P <- seq(0,8,1) ## define number of decades of data to grab where 0 = 1 decade, 1 = 2 decades, etc
 df <- NULL ## empty dataframe
@@ -70,6 +75,30 @@ OUT <-
 }
 }
 
+## plot annual mean sea levels for all stations and draw regression line for each station
+df.annual <- df %>%
+  group_by(year) %>%
+  summarise(MSL = mean(MSL*39.3701)) 
+
+class <- df.annual %>%
+  mutate(class = )
+
+range <- (max(df.annual$MSL, na.rm = T) - min(df.annual$MSL, na.rm = T)) / 12
+
+fig <- ggplot(df.annual, aes(x = year, y = MSL)) +
+  geom_line(lwd = 0.5) + 
+  geom_smooth(method = 'loess') + 
+  scale_y_continuous(name = paste('Datum', DATUM, '(in)'),
+                     breaks = round(seq(-9, 8, by = 1), 2),
+                     minor_breaks = seq(-9, 8, by = 1)) + 
+  scale_color_gradient(low = 'yellow', high = 'red') + 
+  # scale_x_date(name = 'Date', 
+  #              date_breaks = '12 months', 
+  #              date_labels = '%y') + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
+        legend.position = 'right') + 
+  ggtitle(paste("Annual Mean Sea Level")) 
+fig
 
 ## plot mean monthly sea levels for all stations and draw regression line for each station
 fig <- ggplot(df, aes(x = date, y = MSL, color = station)) +
@@ -97,7 +126,7 @@ library(ggpmisc)
 my.formula <- y ~ x # generic formula for use in equation
 D <- P+1
 
-for (z in STATION) {
+for (z in 1:length(STATION)) {
 
 for (i in D) {
 
@@ -117,7 +146,7 @@ T_name <- ifelse(T == 3653, "Decade",
 #   arrange(date) %>%
 #   ifelse(first(date) > Sys.Date()-T, filter(dat2$date >= first(date)), filter(dat2$date >= Sys.Date()-T))
 
-dat2 <- filter(df, station == STATION[1]) %>%
+dat2 <- filter(df, station == STATION[[z]]) %>%
   mutate(MSL = MSL*100) %>%
   arrange(date) %>%
 filter(
@@ -164,11 +193,11 @@ fig2 <- ggplot(dat2, aes(x = date, y = MSL)) +
                                         round((coef(m)[2]*T*10/(T/365.3)), 2), 'mm/yr'),
            x = Sys.Date()-(T), y = Inf, hjust =-0.08, vjust = 7) +
   labs(caption = paste("Data: Monthly ", DATUM, " for NOAA Station ID: ", dat2$station, 
-                       ', ', first(dat2$date), ' to ', last(dat2$date), sep = ''))
+                       ', ', first(as.yearmon(dat2$date)), ' to ', last(as.yearmon(dat2$date)), sep = ''))
 fig2
 
 # save plots as .png
 ggsave(fig2, file=paste(datadir,
-                       '/sea-level-trends/', dat2$station[1], '-sea-level-trends_', i, "-decades", ".png", sep=''), width = 6, height = 4, units = 'in', scale=2)
+                       '/sea-level-trends/', dat2$station[[z]], '-sea-level-trends_', i, "-decades", ".png", sep=''), width = 6, height = 4, units = 'in', scale=2)
 }
 }
