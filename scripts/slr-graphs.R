@@ -52,11 +52,12 @@ slr.mid <- ggplot(data = slr3, aes(x = year, y=rsl.ft, group = scenario.t)) +
   scale_colour_manual(name='NOAA SLR Scenario', values=clr, labels = lbl, breaks = lbl) +
   xlab("Year") + 
   ylab("Relative sea level (ft)") +
-  scale_y_continuous(limits = c(0,4), breaks = seq(0,4, 1), expand = c(0,0), 
+  scale_y_continuous(limits = c(0,12), breaks = seq(0,12, 1), expand = c(0,0), 
                      sec.axis = dup_axis(name ='', labels = NULL)) +
-  scale_x_continuous(limits = c(2000,2050), expand = c(0,0), 
+  scale_x_continuous(limits = c(2000,2100), expand = c(0,0), 
                      sec.axis = sec_axis(~., labels = NULL)) +
   ggtitle('Sea Level Rise Forecast for Sapelo Island Area') +
+  labs(caption = 'Data from Sweet et al. 2017') + 
   theme(panel.background = element_rect(fill = "white"),
         axis.ticks.x = element_line(colour = "black"),
          axis.ticks.length = unit(-0.1, "cm"),
@@ -70,7 +71,7 @@ slr.mid <- ggplot(data = slr3, aes(x = year, y=rsl.ft, group = scenario.t)) +
 slr.mid
 
 ## export
-jpeg(file.path(datadir, "figures/sea-level-rise-forecast-sapelo-year2050.jpg"), width = 7, bg="white",
+jpeg(file.path(datadir, "figures/sea-level-rise-forecast-sapelo-year2100.jpg"), width = 7, bg="white",
      height = 5, units = 'in', res = 300)
 slr.mid
 dev.off()
