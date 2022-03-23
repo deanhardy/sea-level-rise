@@ -35,7 +35,8 @@ slr_f <- slr %>%
 ## add text description column for scenarios
 slr2 <- mutate(slr_f, scenario.t = rep(c("Low", "Intermediate-Low", "Intermediate", "Intermediate-High", "High", "Extreme"), 
                                   each = 33),
-               rsl.m = rsl.cm / 100)
+               rsl.m = rsl.cm / 100) %>%
+               mutate(rsl.ft = rsl.m * 3.28084)
 
 slr3 <- filter(slr2, scenario.t != "Low") 
   
@@ -45,17 +46,20 @@ lbl <- (c("Extreme", "High", "Intermediate-High", "Intermediate", "Intermediate-
 ln <- c("twodash", "longdash", "dotdash", "dashed", "solid")
 
 ## plot data
-slr.mid <- ggplot(data = slr3, aes(x = year, y=rsl.m, group = scenario.t)) + 
+slr.mid <- ggplot(data = slr3, aes(x = year, y=rsl.ft, group = scenario.t)) + 
   geom_smooth(data = filter(slr3, level == 'med'), se = FALSE, size = 0.5,
               aes(color = scenario.t)) +
-  scale_colour_manual(name='Scenario', values=clr, labels = lbl, breaks = lbl) +
+  scale_colour_manual(name='NOAA SLR Scenario', values=clr, labels = lbl, breaks = lbl) +
   xlab("Year") + 
-  ylab("Relative sea level (m)") +
-  scale_y_continuous(limits = c(0,3.5), expand = c(0,0), sec.axis = sec_axis(~., labels = NULL)) +
-  scale_x_continuous(limits = c(2000,2100), expand = c(0,0), sec.axis = sec_axis(~., labels = NULL)) +
+  ylab("Relative sea level (ft)") +
+  scale_y_continuous(limits = c(0,4), breaks = seq(0,4, 1), expand = c(0,0), 
+                     sec.axis = dup_axis(name ='', labels = NULL)) +
+  scale_x_continuous(limits = c(2000,2050), expand = c(0,0), 
+                     sec.axis = sec_axis(~., labels = NULL)) +
+  ggtitle('Sea Level Rise Forecast for Sapelo Island Area') +
   theme(panel.background = element_rect(fill = "white"),
         axis.ticks.x = element_line(colour = "black"),
-        axis.ticks.length = unit(0.2, "cm"),
+         axis.ticks.length = unit(-0.1, "cm"),
         axis.line = element_line(colour = "black"),
         axis.text = element_text(margin = margin(5,0.5,5,5, "cm")),
         axis.text.y.right = element_blank(),
@@ -65,9 +69,9 @@ slr.mid <- ggplot(data = slr3, aes(x = year, y=rsl.m, group = scenario.t)) +
   )
 slr.mid
 
-## export tiff
-tiff(file.path(datadir, "figures/sapelo-slr-mid.tif"), width = 3.25, bg="white",
-     height = 3, units = 'in', res = 300)
+## export
+jpeg(file.path(datadir, "figures/sea-level-rise-forecast-sapelo-year2050.jpg"), width = 7, bg="white",
+     height = 5, units = 'in', res = 300)
 slr.mid
 dev.off()
 
@@ -100,7 +104,7 @@ slr.ranges <- ggplot(data = slr3, aes(x = year, y=rsl.m, group = scenario.t)) +
 slr.ranges
 
 ## export tiff
-tiff(file.path(datadir, "figures/sapelo-slr-ranges.tif"), width = 5, bg="white",
-     height = 4, units = 'in', res = 300)
+tiff(file.path(datadir, "figures/sapelo-slr-ranges.tif"), width = 7, bg="white",
+     height = 7, units = 'in', res = 300)
 slr.ranges
 dev.off()
