@@ -19,7 +19,7 @@ datadir <- '/Users/dhardy/Dropbox/r_data/sea-level-rise'
 
 ## define variables
 
-STATION <- c(8670870, 8720030, 8661070) ## define stations 8720030 (Fernandina), 8670870 (Fort Pulaski), 8661070 (Springmaid Pier, SC)
+STATION <- c(8670870, 8720030) ## define stations 8720030 (Fernandina), 8670870 (Fort Pulaski), 8661070 (Springmaid Pier, SC)
 DATUM <- 'MSL' ## define datum
 P <- seq(0,8,1) ## define number of decades of data to grab where 0 = 1 decade, 1 = 2 decades, etc
 df <- NULL ## empty dataframe
@@ -32,9 +32,9 @@ high_low <-
     end_date = as.character(as.Date("2001-03-09"), format = '%Y%m%d') %>%
       gsub('-', '', .) %>%
       as.numeric(),
-    station_name = STATION,
+    station_name = '8670870',
     product = 'high_low', 
-    datum = DATUM, 
+    datum = 'MSL', 
     units = 'metric', 
     time_zone = 'GMT')$data
 
@@ -77,8 +77,8 @@ df.annual <- df %>%
   group_by(year) %>%
   summarise(MSL = mean(MSL*39.3701)) 
 
-class <- df.annual %>%
-  mutate(class = )
+# class <- df.annual %>%
+#   mutate(class = )
 
 range <- (max(df.annual$MSL, na.rm = T) - min(df.annual$MSL, na.rm = T)) / 12
 
