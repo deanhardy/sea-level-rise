@@ -14,7 +14,7 @@ library(zoo)
 datadir <- '/Users/dhardy/Dropbox/r_data/sea-level-rise'
 
 ## set text size in figures
-txt <- 18  
+txt <- 32  
 
 ## import average seasonal cycle data
 # test <- read.csv("https://tidesandcurrents.noaa.gov/sltrends/data/USAverageSeasonalCycleData.csv",
