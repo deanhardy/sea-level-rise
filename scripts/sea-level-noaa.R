@@ -13,6 +13,9 @@ library(zoo)
 ## define data directory
 datadir <- '/Users/dhardy/Dropbox/r_data/sea-level-rise'
 
+## set text size in figures
+txt <- 18  
+
 ## import average seasonal cycle data
 # test <- read.csv("https://tidesandcurrents.noaa.gov/sltrends/data/USAverageSeasonalCycleData.csv",
 #                  stringsAsFactors = FALSE)
@@ -24,24 +27,24 @@ DATUM <- 'MSL' ## define datum
 P <- seq(0,8,1) ## define number of decades of data to grab where 0 = 1 decade, 1 = 2 decades, etc
 df <- NULL ## empty dataframe
 
-high_low <-
-  coops_search(
-    begin_date = as.character(as.Date("2000-03-09"), format = '%Y%m%d') %>% 
-      gsub('-', '', .) %>%
-      as.numeric(),
-    end_date = as.character(as.Date("2001-03-09"), format = '%Y%m%d') %>%
-      gsub('-', '', .) %>%
-      as.numeric(),
-    station_name = '8670870',
-    product = 'high_low', 
-    datum = 'MSL', 
-    units = 'metric', 
-    time_zone = 'GMT')$data
+# high_low <-
+#   coops_search(
+#     begin_date = as.character(as.Date("2000-03-09"), format = '%Y%m%d') %>% 
+#       gsub('-', '', .) %>%
+#       as.numeric(),
+#     end_date = as.character(as.Date("2001-03-09"), format = '%Y%m%d') %>%
+#       gsub('-', '', .) %>%
+#       as.numeric(),
+#     station_name = '8670870',
+#     product = 'high_low', 
+#     datum = 'MSL', 
+#     units = 'metric', 
+#     time_zone = 'GMT')$data
 
-hl <- high_low %>% filter(ty == 'HH')
-
-ggplot(aes(t, v), data = hl) +
-  geom_point()
+# hl <- high_low %>% filter(ty == 'HH')
+# 
+# ggplot(aes(t, v), data = hl) +
+#   geom_point()
 
 ## for loop to grab data in decadal increments for multiple stations
 for (z in 1:length(STATION)) {
@@ -155,14 +158,14 @@ filter(
 )
   
 m <- lm(MSL ~ date, dat2) ## create regression line
-  
+
 ## 
 ## mimic style in NOAA graph here: https://tidesandcurrents.noaa.gov/sltrends/sltrends_station.shtml?id=8670870
 fig2 <- ggplot(dat2, aes(x = date, y = MSL)) +
   geom_hline(yintercept = 0, linetype = 1.5, lwd = 0.5) +
   geom_line(color = 'blue', lwd = 0.2) + 
   geom_smooth(method = 'lm', color = 'black', formula = my.formula) +
-  geom_smooth(method = 'loess', color = 'grey30', linetype = 2, se = FALSE) +
+  geom_smooth(method = 'loess', span = 60, color = 'grey30', linetype = 2, se = FALSE) +
   scale_y_continuous(name = paste(DATUM, '(cm)'),
                      breaks = seq(-40, 40, by = 10),
                      minor_breaks = seq(-40, 40, by = 5),
@@ -174,8 +177,9 @@ fig2 <- ggplot(dat2, aes(x = date, y = MSL)) +
                date_labels = '%Y',
                expand = c(0,0)) + 
               # limits = c(first(date), last(date))) + 
-  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10),
-        axis.text.y = element_text(size = 10),
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = txt),
+        axis.text.y = element_text(size = txt),
+        text = element_text(size = txt),
         legend.position = 'bottom',
         panel.background = element_rect(fill = "white", color = 'black', linetype = 1),
         #panel.border = element_rect(fill = 'white', color = 'black'),
@@ -185,16 +189,16 @@ fig2 <- ggplot(dat2, aes(x = date, y = MSL)) +
   ggtitle(paste("Sea Level Trend Over Past ", T_name, sep = ''))  +
   annotate(geom = 'text', label = paste("Total Observed SLR for Period =",
                                         round(coef(m)[2]*T, 2), 'cm'),
-           x = Sys.Date()-(T), y = Inf, hjust = -0.1, vjust = 5) +
+           x = Sys.Date()-(T), y = Inf, hjust = -0.1, vjust = 5, size = 12) +
   annotate(geom = 'text', label = paste("Linear Relative Sea Level Trend (black line) =",
                                         round((coef(m)[2]*T*10/(T/365.3)), 2), 'mm/yr'),
-           x = Sys.Date()-(T), y = Inf, hjust =-0.08, vjust = 7) +
+           x = Sys.Date()-(T), y = Inf, hjust =-0.08, vjust = 7, size = 12) +
   labs(caption = paste("Data: Monthly ", DATUM, " for NOAA Station ID: ", dat2$station, 
                        ', ', first(as.yearmon(dat2$date)), ' to ', last(as.yearmon(dat2$date)), sep = ''))
 fig2
 
 # save plots as .png
 ggsave(fig2, file=paste(datadir,
-                       '/sea-level-trends/', dat2$station[[z]], '-sea-level-trends_', i, "-decades", ".png", sep=''), width = 6, height = 4, units = 'in', scale=2)
+                       '/sea-level-trends/', dat2$station[[z]], '-sea-level-trends_', i, "-decades", ".png", sep=''), width = 13, height = 6, units = 'in', scale=2)
 }
 }
