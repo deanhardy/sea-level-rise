@@ -163,7 +163,7 @@ m <- lm(MSL ~ date, dat2) ## create regression line
 ## mimic style in NOAA graph here: https://tidesandcurrents.noaa.gov/sltrends/sltrends_station.shtml?id=8670870
 fig2 <- ggplot(dat2, aes(x = date, y = MSL)) +
   geom_hline(yintercept = 0, linetype = 1.5, lwd = 0.5) +
-  geom_line(color = 'blue', lwd = 0.2) + 
+  geom_line(color = 'blue', lwd = 1) + 
   geom_smooth(method = 'lm', color = 'black', formula = my.formula) +
   geom_smooth(method = 'loess', span = 60, color = 'grey30', linetype = 2, se = FALSE) +
   scale_y_continuous(name = paste(DATUM, '(cm)'),
