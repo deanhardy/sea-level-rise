@@ -29,6 +29,7 @@ slr_f <- slr22 %>%
   filter(site == loc) %>%
   select(site, scenario, rsl2005:rsl2100) %>%
   mutate(rsl2000 = as.integer(0)) %>%
+  relocate(rsl2000, .after = scenario) %>%
   separate(scenario, c('scenario', 'level'), sep = " - ") %>%
   gather('year', 'rsl.cm', 4:14) %>%
   mutate(level = tolower(level),
@@ -43,51 +44,56 @@ slr_f <- slr22 %>%
                                                                         ifelse(year == 'rsl2080', 2080,
                                                                                ifelse(year == 'rsl2090', 2090,
                                                                                       ifelse(year == 'rsl2100', 2100, 
-                                                                                             if_else(year == 'rsl2005', 2005, year))))))))))))) %>%
+                                                                                             ifelse(year =='rsl2005', 2005, year))))))))))))) %>%
   arrange(., scenario) %>%
   mutate(year = as.integer(year))
 
 ## add text description column for scenarios
-slr2 <- mutate(slr_f, scenario.t = rep(c("Low", "Intermediate-Low", "Intermediate", "Intermediate-High", "High"), 
-                                  each = 33),
-               rsl.m = rsl.cm / 100) %>%
-               mutate(rsl.ft = rsl.m * 3.28084)
+slr2 <- slr_f %>%
+  mutate(scenario.t = rep(c("Low", "Intermediate-Low", "Intermediate", "Intermediate-High", "High"), 
+                                  each = 33), rsl.cm = rsl.cm + 2) %>%
+  mutate(rsl.m = rsl.cm / 100) %>%
+  mutate(rsl.ft = rsl.m * 3.28084)
 
-slr3 <- filter(slr2, scenario.t != "Low") 
-  
+
 ## define plot/legend visual aids
 clr<- (c("red", "orange", "green", "yellow", "blue"))
-lbl <- (c("Extreme", "High", "Intermediate-High", "Intermediate", "Intermediate-Low"))
+lbl <- (c("High", "Intermediate-High", "Intermediate", "Intermediate-Low", 'Low'))
 ln <- c("twodash", "longdash", "dotdash", "dashed", "solid")
+fnt <- 18 ## figure text size
+ant.fnt <- 6 ## annotation text size
 
 ## plot data
-slr.mid <- ggplot(data = slr3, aes(x = year, y=rsl.ft, group = scenario.t)) + 
-  geom_smooth(data = filter(slr3, level == 'med'), se = FALSE, size = 0.5,
+slr.mid <- ggplot(data = slr2, aes(x = year, y=rsl.m, group = scenario.t)) + 
+  geom_smooth(data = filter(slr2, level == 'med'), se = FALSE, linewidth = 1,
               aes(color = scenario.t)) +
   scale_colour_manual(name='NOAA SLR Scenario', values=clr, labels = lbl, breaks = lbl) +
   xlab("Year") + 
-  ylab("Relative sea level (ft)") +
-  scale_y_continuous(limits = c(0,12), breaks = seq(0,12, 1), expand = c(0,0), 
+  ylab("Relative Sea Level (m)") +
+  scale_y_continuous(limits = c(0,2.5), breaks = seq(0,2.5, 0.5), 
                      sec.axis = dup_axis(name ='', labels = NULL)) +
   scale_x_continuous(limits = c(2000,2100), expand = c(0,0), 
                      sec.axis = sec_axis(~., labels = NULL)) +
-  ggtitle('Sea Level Rise Forecast for Sapelo Island Area') +
-  labs(caption = 'Data from Sweet et al. 2017') + 
+  # ggtitle('Global Mean Sea Level Rise') +
+  labs(caption = 'Data from Sweet et al. 2022', size = fnt) + 
   theme(panel.background = element_rect(fill = "white"),
         axis.ticks.x = element_line(colour = "black"),
-         axis.ticks.length = unit(-0.1, "cm"),
+        axis.ticks.length = unit(-0.1, "cm"),
+        axis.title = element_text(size = fnt),
         axis.line = element_line(colour = "black"),
-        axis.text = element_text(margin = margin(5,0.5,5,5, "cm")),
+        axis.text = element_text(margin = margin(5,0.5,5,5, "cm"), size = fnt),
         axis.text.y.right = element_blank(),
         axis.text.x.top = element_blank(),
-        legend.position = c(0.32, 0.65)
+        legend.position = c(0.32, 0.65),
+        legend.text = element_text(size=fnt),
+        legend.title = element_text(size = fnt)
         ##legend.title = element_text(name='SLR Scenario')
   )
 slr.mid
 
 ## export
-jpeg(file.path(datadir, "figures/sea-level-rise-forecast-sapelo-year2100.jpg"), width = 7, bg="white",
-     height = 5, units = 'in', res = 300)
+png(file.path(datadir, "figures/slr-forecast-gmsl-year2100.png"), width = 13.33, bg="white",
+     height = 7, units = 'in', res = 150)
 slr.mid
 dev.off()
 
