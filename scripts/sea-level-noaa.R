@@ -22,7 +22,7 @@ txt <- 32
 
 ## define variables
 
-STATION <- c(8670870, 8720030) ## define stations 8720030 (Fernandina), 8670870 (Fort Pulaski), 8661070 (Springmaid Pier, SC)
+STATION <- c(8720030, 8670870) ## define stations 8720030 (Fernandina), 8670870 (Fort Pulaski), 8661070 (Springmaid Pier, SC), 8729108 (Panama City, FL)
 DATUM <- 'MSL' ## define datum
 P <- seq(0,8,1) ## define number of decades of data to grab where 0 = 1 decade, 1 = 2 decades, etc
 df <- NULL ## empty dataframe
@@ -165,7 +165,7 @@ fig2 <- ggplot(dat2, aes(x = date, y = MSL)) +
   geom_hline(yintercept = 0, linetype = 1.5, lwd = 0.5) +
   geom_line(color = 'blue', lwd = 1) + 
   geom_smooth(method = 'lm', color = 'black', formula = my.formula) +
-  geom_smooth(method = 'loess', span = 60, color = 'grey30', linetype = 2, se = FALSE) +
+  geom_smooth(method = 'loess', color = 'grey30', linetype = 2, se = FALSE) +
   scale_y_continuous(name = paste(DATUM, '(cm)'),
                      breaks = seq(-40, 40, by = 10),
                      minor_breaks = seq(-40, 40, by = 5),
