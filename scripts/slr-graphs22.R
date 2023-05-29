@@ -1,39 +1,54 @@
+## script to plot Sweet et al. 2022 SLR data from NOAA and other agencies.
+
 rm(list=ls())
 
 library(tidyverse) ## load tidyverse package
+library(data.table)
 
 ## set data directory
 datadir <- '/Users/dhardy/Dropbox/r_data/sea-level-rise'
 
 ## define SLR site(s) of interest
-loc <- c('grid_31.5_278.5') ## Sapelo Island, Georgia's closest grid point
+loc <- 'GMSL'
 
-## import data from Sweet et al 2017, grid pt 31.5, 278.5 just inland in McIntosh
-slr <- read.csv(file.path(datadir, "data/slr-noaa17.csv"), stringsAsFactors = F, header=T)
+## import data
+slr22 <- read.csv(file.path(datadir, "data/slr-noaa22.csv"), stringsAsFactors = F, header=T, skip = 17) %>%
+  select(!c(X:X.93)) 
+
+## rename columnns
+old <- colnames(slr22)
+new <- c('site', 'psmsl_id', 'noaa_id', 'name', 'grid_num', 'lat', 'long', 'region_class', 'coastline_intersect', 'scenario', 'vlm_contribution',
+         'epoch_offset_92_00', 'offset_00_05', 'rsl2005', 'rsl2020', 'rsl2030', 'rsl2040', 'rsl2050', 'rsl2060', 'rsl2070', 'rsl2080', 'rsl2090', 
+         'rsl2100', 'rsl2110', 'rsl2120', 'rsl2130', 'rsl2140', 'rsl2150')
+  
+setnames(slr22, old = old, 
+         new = new)
 
 ## filter to site(s) of interest
-slr_f <- slr %>%
+slr_f <- slr22 %>%
   filter(site == loc) %>%
-  select(site, scenario, rsl00:rsl2100) %>%
+  select(site, scenario, rsl2005:rsl2100) %>%
+  mutate(rsl2000 = as.integer(0)) %>%
   separate(scenario, c('scenario', 'level'), sep = " - ") %>%
   gather('year', 'rsl.cm', 4:14) %>%
   mutate(level = tolower(level),
-         year = ifelse(year == 'rsl00', 2000, 
-                       ifelse(year == 'rsl10', 2010,
-                              ifelse(year == 'rsl20', 2020,
-                                     ifelse(year == 'rsl30', 2030, 
-                                            ifelse(year == 'rsl40', 2040,
-                                                   ifelse(year == 'rsl50', 2050,
-                                                          ifelse(year == 'rsl60', 2060,
-                                                                 ifelse(year == 'rsl70', 2070,
-                                                                        ifelse(year == 'rsl80', 2080,
-                                                                               ifelse(year == 'rsl90', 2090,
-                                                                                      ifelse(year == 'rsl2100', 2100, year)))))))))))) %>%
+         year = ifelse(year == 'rsl2000', 2000, 
+                       ifelse(year == 'rsl2010', 2010,
+                              ifelse(year == 'rsl2020', 2020,
+                                     ifelse(year == 'rsl2030', 2030, 
+                                            ifelse(year == 'rsl2040', 2040,
+                                                   ifelse(year == 'rsl2050', 2050,
+                                                          ifelse(year == 'rsl2060', 2060,
+                                                                 ifelse(year == 'rsl2070', 2070,
+                                                                        ifelse(year == 'rsl2080', 2080,
+                                                                               ifelse(year == 'rsl2090', 2090,
+                                                                                      ifelse(year == 'rsl2100', 2100, 
+                                                                                             if_else(year == 'rsl2005', 2005, year))))))))))))) %>%
   arrange(., scenario) %>%
   mutate(year = as.integer(year))
 
 ## add text description column for scenarios
-slr2 <- mutate(slr_f, scenario.t = rep(c("Low", "Intermediate-Low", "Intermediate", "Intermediate-High", "High", "Extreme"), 
+slr2 <- mutate(slr_f, scenario.t = rep(c("Low", "Intermediate-Low", "Intermediate", "Intermediate-High", "High"), 
                                   each = 33),
                rsl.m = rsl.cm / 100) %>%
                mutate(rsl.ft = rsl.m * 3.28084)
