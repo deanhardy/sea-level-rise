@@ -105,8 +105,8 @@ fig <- ggplot(df, aes(x = date, y = MSL, color = station)) +
   geom_line(lwd = 0.5) + 
   geom_smooth(method = 'lm') + 
   scale_y_continuous(name = paste('Datum', DATUM, '(m)'),
-                     breaks = round(seq(-0.2, 0.4, by = 0.1), 2),
-                     minor_breaks = seq(-0.2, 0.4, by = 0.05)) + 
+                     breaks = round(seq(-0.2, 0.5, by = 0.1), 2),
+                     minor_breaks = seq(-0.2, 0.5, by = 0.05)) + 
   scale_x_date(name = 'Date', 
                date_breaks = '12 months', 
                date_labels = '%y') + 
@@ -167,10 +167,13 @@ fig2 <- ggplot(dat2, aes(x = date, y = MSL)) +
   geom_smooth(method = 'lm', color = 'black', formula = my.formula) +
   geom_smooth(method = 'loess', color = 'grey30', linetype = 2, se = FALSE) +
   scale_y_continuous(name = paste(DATUM, '(cm)'),
-                     breaks = seq(-40, 40, by = 10),
-                     minor_breaks = seq(-40, 40, by = 5),
-                     limits = c(-40, 40),
-                     expand = c(0,0)) + 
+                     breaks = seq(-50, 50, by = 10),
+                     minor_breaks = seq(-50, 50, by = 5),
+                     limits = c(-50, 50),
+                     expand = c(0,0),
+                     sec.axis = sec_axis(~. *0.393701, 
+                                         name = "MSL (inches)",
+                                         breaks = seq(-20,20,2))) + 
   scale_x_date(name = 'Year', 
                date_breaks = '2 years', 
                date_minor_breaks = '1 year',
