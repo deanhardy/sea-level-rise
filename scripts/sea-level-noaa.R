@@ -7,6 +7,7 @@ rm(list=ls())
 
 library(rnoaa) ## package info https://cran.r-project.org/web/packages/rnoaa/rnoaa.pdf
 library(tidyverse)
+library(tidyquant)
 library(hydrostats)
 library(zoo)
 
@@ -161,11 +162,13 @@ m <- lm(MSL ~ date, dat2) ## create regression line
 
 ## 
 ## mimic style in NOAA graph here: https://tidesandcurrents.noaa.gov/sltrends/sltrends_station.shtml?id=8670870
+## add moving averages https://www.r-bloggers.com/2021/04/ggplot-with-moving-averages/
 fig2 <- ggplot(dat2, aes(x = date, y = MSL)) +
   geom_hline(yintercept = 0, linetype = 1.5, lwd = 0.5) +
   geom_line(color = 'blue', lwd = 1) + 
   geom_smooth(method = 'lm', color = 'black', formula = my.formula) +
   geom_smooth(method = 'loess', color = 'grey30', linetype = 2, se = FALSE) +
+  geom_ma(ma_fun = SMA, n = 60, color = "red") +  # Plot 5-year SMA
   scale_y_continuous(name = paste(DATUM, '(cm)'),
                      breaks = seq(-50, 50, by = 10),
                      minor_breaks = seq(-50, 50, by = 5),
