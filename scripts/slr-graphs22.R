@@ -60,23 +60,109 @@ slr2 <- slr_f %>%
 clr<- (c("red", "orange", "green", "yellow", "blue"))
 lbl <- (c("High", "Intermediate-High", "Intermediate", "Intermediate-Low", 'Low'))
 ln <- c("twodash", "longdash", "dotdash", "dashed", "solid")
-fnt <- 18 ## figure text size
+fnt <- 10 ## figure text size
 ant.fnt <- 6 ## annotation text size
 
 ## plot data
-slr.mid <- ggplot(data = slr2, aes(x = year, y=rsl.m, group = scenario.t)) + 
-  geom_smooth(data = filter(slr2, level == 'med'), se = FALSE, linewidth = 1,
+slr.mid <- ggplot(data = slr2, aes(x = year, y=rsl.ft, group = scenario.t)) + 
+  geom_smooth(data = filter(slr2, level == 'med'), se = FALSE, linewidth = 0.5,
               aes(color = scenario.t)) +
-  scale_colour_manual(name='NOAA SLR Scenario', values=clr, labels = lbl, breaks = lbl) +
+  scale_colour_manual(name='SLR Scenario', values=clr, labels = lbl, breaks = lbl) +
   xlab("Year") + 
-  ylab("Relative Sea Level (m)") +
-  scale_y_continuous(limits = c(0,2.5), breaks = seq(0,2.5, 0.5), 
-                     sec.axis = dup_axis(name ='', labels = NULL)) +
-  scale_x_continuous(limits = c(2000,2100), expand = c(0,0), 
-                     sec.axis = sec_axis(~., labels = NULL)) +
+  ylab("Projected Sea Level Rise (feet)") +
+  scale_y_continuous(limits = c(0,7), breaks = seq(0,7, 1) 
+                     # sec.axis = dup_axis(name ='', labels = NULL)
+                     ) +
+  scale_x_continuous(limits = c(2000,2100), expand = c(0,0)
+                     # sec.axis = sec_axis(~., labels = NULL)
+                     ) +
   # ggtitle('Global Mean Sea Level Rise') +
-  labs(caption = 'Data from Sweet et al. 2022', size = fnt) + 
-  theme(panel.background = element_rect(fill = "white"),
+  # labs(caption = 'Data from Sweet et al. 2022', size = fnt) + 
+  theme(panel.background = element_rect(fill = 'NA', color = 'black'),
+        panel.grid.major.y = element_line(linetype = 'dashed', color = 'black'),
+        plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm"),
+        axis.ticks.x = element_line(colour = "black"),
+        axis.ticks.length = unit(-0.1, "cm"),
+        axis.title = element_text(size = fnt),
+        axis.line = element_line(colour = "black"),
+        axis.text = element_text(margin = margin(5,0.5,5,5, "cm"), size = fnt),
+        axis.text.y.right = element_blank(),
+        axis.text.x.top = element_blank(),
+        legend.position = c(0.32, 0.65),
+        legend.text = element_text(size=fnt),
+        legend.title = element_text(size = fnt),
+        legend.background = element_rect(color = 'black', fill = 'white')
+        ##legend.title = element_text(name='SLR Scenario')
+  )
+slr.mid
+
+## export
+png(file.path(datadir, "figures/slr-forecast-gmsl-year2100.png"), width = 3.75, bg="white",
+     height = 3.9, units = 'in', res = 300)
+slr.mid
+dev.off()
+
+## plot data using shading for upper and lower ranges
+# slr.ranges <- ggplot(data = slr3, aes(x = year, y=rsl.m, group = scenario.t)) + 
+#   geom_smooth(data = filter(slr3, level == 'med'), se = FALSE, size = 0.5,
+#               aes(color = scenario.t)) +
+#   # geom_line() + 
+#   geom_ribbon(data = filter(slr3, level == 'low'), aes(ymin = rsl.m, ymax = rsl.m, color = scenario.t), 
+#               linetype = 2, alpha = 0, lwd = 0.1) +
+#   geom_ribbon(data = filter(slr3, level == 'high'), aes(ymin = rsl.m, ymax = rsl.m, color = scenario.t), 
+#               linetype = 2, alpha = 0, lwd = 0.1) +
+#   scale_colour_manual(name='Scenario', values=clr, labels = lbl, breaks = lbl) +
+#   xlab("Year") + 
+#   ylab("Relative sea level (m)") +
+#   scale_y_continuous(limits = c(0,3.5), expand = c(0,0), sec.axis = sec_axis(~., labels = NULL)) +
+#   scale_x_continuous(limits = c(2000,2100), expand = c(0,0), sec.axis = sec_axis(~., labels = NULL)) +
+#   theme(panel.background = element_rect(fill = "white"),
+#         axis.ticks.x = element_line(colour = "black"),
+#         axis.ticks.length = unit(0.2, "cm"),
+#         axis.line = element_line(colour = "black"),
+#         axis.text = element_text(margin = margin(5,0.5,5,5, "cm")),
+#         axis.text.y.right = element_blank(),
+#         axis.text.x.top = element_blank(),
+#         legend.position = c(0.25, 0.65)
+#         ##legend.title = element_text(name='SLR Scenario')
+#   ) + 
+#   ggtitle("Sapelo Island, Georgia") + 
+#   labs(caption = "Data from Kopp et al. (2014)")
+# slr.ranges
+# 
+# ## export tiff
+# tiff(file.path(datadir, "figures/sapelo-slr-ranges.tif"), width = 7, bg="white",
+#      height = 7, units = 'in', res = 300)
+# slr.ranges
+# dev.off()
+
+
+#######################
+## SLR mean trend past
+#######################
+## import data
+mt22 <- read.csv(file.path(datadir, "data/8670870_meantrend.csv"), stringsAsFactors = F, header=T, skip = 5)
+
+## rename columnns
+old_mt <- colnames(mt22)
+new_mt <- c('year', 'month', 'monthly', 'trend', 'high_conf', 'low_conf')
+
+setnames(mt22, old = old_mt, 
+         new = new_mt)
+
+mt22.2 <- mt22 %>%
+  mutate(date = as.Date(paste(as.character(year), as.character(month), '15', sep = '/'), format = '%Y/%m/%d'))
+  
+fp <- ggplot(mt22.2) + 
+  geom_line(aes(date, monthly * 3.28084), color = 'blue', linewidth = 0.1) + 
+  geom_line(aes(date, trend * 3.28084), color = 'red') + 
+  geom_hline(yintercept = 0) + 
+  scale_y_continuous(name = 'Observed Sea Level Trend (feet)', limits = c(-1.5, 1.5), breaks = seq(-1.5, 1.5, 0.5)) + 
+  scale_x_date(name = 'Year') + 
+  theme(panel.background = element_blank(),
+        panel.grid.major.y = element_line(linetype = 'dashed', color ='black'),
+        panel.border = element_rect(color = 'black', fill = 'NA'),
+        plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm"),
         axis.ticks.x = element_line(colour = "black"),
         axis.ticks.length = unit(-0.1, "cm"),
         axis.title = element_text(size = fnt),
@@ -88,45 +174,11 @@ slr.mid <- ggplot(data = slr2, aes(x = year, y=rsl.m, group = scenario.t)) +
         legend.text = element_text(size=fnt),
         legend.title = element_text(size = fnt)
         ##legend.title = element_text(name='SLR Scenario')
-  )
-slr.mid
+  )  
+fp
 
 ## export
-png(file.path(datadir, "figures/slr-forecast-gmsl-year2100.png"), width = 13.33, bg="white",
-     height = 7, units = 'in', res = 150)
-slr.mid
-dev.off()
-
-## plot data using shading for upper and lower ranges
-slr.ranges <- ggplot(data = slr3, aes(x = year, y=rsl.m, group = scenario.t)) + 
-  geom_smooth(data = filter(slr3, level == 'med'), se = FALSE, size = 0.5,
-              aes(color = scenario.t)) +
-  # geom_line() + 
-  geom_ribbon(data = filter(slr3, level == 'low'), aes(ymin = rsl.m, ymax = rsl.m, color = scenario.t), 
-              linetype = 2, alpha = 0, lwd = 0.1) +
-  geom_ribbon(data = filter(slr3, level == 'high'), aes(ymin = rsl.m, ymax = rsl.m, color = scenario.t), 
-              linetype = 2, alpha = 0, lwd = 0.1) +
-  scale_colour_manual(name='Scenario', values=clr, labels = lbl, breaks = lbl) +
-  xlab("Year") + 
-  ylab("Relative sea level (m)") +
-  scale_y_continuous(limits = c(0,3.5), expand = c(0,0), sec.axis = sec_axis(~., labels = NULL)) +
-  scale_x_continuous(limits = c(2000,2100), expand = c(0,0), sec.axis = sec_axis(~., labels = NULL)) +
-  theme(panel.background = element_rect(fill = "white"),
-        axis.ticks.x = element_line(colour = "black"),
-        axis.ticks.length = unit(0.2, "cm"),
-        axis.line = element_line(colour = "black"),
-        axis.text = element_text(margin = margin(5,0.5,5,5, "cm")),
-        axis.text.y.right = element_blank(),
-        axis.text.x.top = element_blank(),
-        legend.position = c(0.25, 0.65)
-        ##legend.title = element_text(name='SLR Scenario')
-  ) + 
-  ggtitle("Sapelo Island, Georgia") + 
-  labs(caption = "Data from Kopp et al. (2014)")
-slr.ranges
-
-## export tiff
-tiff(file.path(datadir, "figures/sapelo-slr-ranges.tif"), width = 7, bg="white",
-     height = 7, units = 'in', res = 300)
-slr.ranges
+png(file.path(datadir, "figures/slr-fp_mean_trend.png"), width = 3.75, bg="white",
+    height = 3.9, units = 'in', res = 300)
+fp
 dev.off()
